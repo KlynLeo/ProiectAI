@@ -1,0 +1,261 @@
+{
+  "n_queens": {
+    "topic": "Search Problem",
+    "instances": [
+      {
+        "instance": "placing 8 queens on an 8x8 chessboard so that none attack each other",
+        "strategy": "Backtracking with pruning"
+      },
+      {
+        "instance": "solving the 12-queens puzzle on a 12x12 board",
+        "strategy": "Backtracking with forward checking"
+      },
+      {
+        "instance": "placing queens on a 20x20 board with diagonal constraint checks",
+        "strategy": "Backtracking optimized with constraint propagation"
+      },
+      {
+        "instance": "solving the 8-queens problem using local optimization and restarts",
+        "strategy": "Hill climbing with random restarts"
+      },
+      {
+        "instance": "finding one valid configuration of queens on a 10x10 board quickly",
+        "strategy": "Depth-first search with pruning"
+      }
+    ]
+  },
+
+  "graph_coloring": {
+    "topic": "Constraint Satisfaction Problem",
+    "instances": [
+      {
+        "instance": "coloring the regions of a map of Europe with 4 colors",
+        "strategy": "Backtracking with MRV heuristic"
+      },
+      {
+        "instance": "assigning time slots to university exams to avoid student overlaps",
+        "strategy": "Constraint satisfaction search with forward checking"
+      },
+      {
+        "instance": "coloring nodes of a social network graph to prevent same-color neighbors",
+        "strategy": "Backtracking with constraint propagation"
+      },
+      {
+        "instance": "assigning frequencies to 10 radio towers to avoid interference",
+        "strategy": "Heuristic graph coloring using least-constraining value"
+      },
+      {
+        "instance": "coloring a complex planar graph with minimal colors",
+        "strategy": "Greedy coloring algorithm with look-ahead check"
+      }
+    ]
+  },
+
+  "tower_of_hanoi": {
+    "topic": "Search Problem",
+    "instances": [
+      {
+        "instance": "moving 3 disks from peg A to peg C using peg B as auxiliary",
+        "strategy": "Recursive depth-first search"
+      },
+      {
+        "instance": "solving the Tower of Hanoi for 6 disks efficiently",
+        "strategy": "Recursive backtracking search"
+      },
+      {
+        "instance": "finding minimal moves for 4 disks between three towers",
+        "strategy": "Divide and conquer recursion"
+      },
+      {
+        "instance": "simulating the 10-disk Hanoi problem iteratively",
+        "strategy": "Iterative deepening search"
+      },
+      {
+        "instance": "representing the Hanoi state transitions in a search tree",
+        "strategy": "Breadth-first traversal of state space"
+      }
+    ]
+  },
+
+  "knights_tour": {
+    "topic": "Search Problem",
+    "instances": [
+      {
+        "instance": "finding a complete knight’s tour on an 8x8 board starting from (0,0)",
+        "strategy": "Depth-first search with backtracking"
+      },
+      {
+        "instance": "constructing a closed knight’s tour that ends where it started",
+        "strategy": "Warnsdorff’s rule heuristic"
+      },
+      {
+        "instance": "solving a 6x6 knight’s tour starting from the center square",
+        "strategy": "Depth-first search with degree heuristic"
+      },
+      {
+        "instance": "computing an open tour for a 10x10 chessboard",
+        "strategy": "Constraint satisfaction search with pruning"
+      },
+      {
+        "instance": "optimizing knight moves to minimize backtracking on a 5x5 board",
+        "strategy": "Backtracking with heuristic ordering"
+      }
+    ]
+  },
+
+  "pathfinding": {
+    "topic": "Heuristic Search",
+    "instances": [
+      {
+        "instance": "finding the shortest path in a 5x5 grid with obstacles",
+        "strategy": "A* search with Manhattan distance heuristic"
+      },
+      {
+        "instance": "navigating a robot in a warehouse with weighted edges",
+        "strategy": "Dijkstra’s algorithm"
+      },
+      {
+        "instance": "finding a low-cost route for a delivery drone in a city graph",
+        "strategy": "A* search with Euclidean distance heuristic"
+      },
+      {
+        "instance": "solving a maze with dead ends and a single goal",
+        "strategy": "Depth-first search"
+      },
+      {
+        "instance": "finding the fastest driving route between two cities",
+        "strategy": "Uniform cost search"
+      }
+    ]
+  },
+
+  "puzzle_8": {
+    "topic": "State-space Search",
+    "instances": [
+      {
+        "instance": "solving the 8-puzzle from the initial state [2,8,3,1,6,4,7,_,5]",
+        "strategy": "A* search with Manhattan distance heuristic"
+      },
+      {
+        "instance": "solving the 15-puzzle using misplaced tile count as heuristic",
+        "strategy": "A* search with misplaced tiles heuristic"
+      },
+      {
+        "instance": "finding an optimal path to the goal state in 8-puzzle",
+        "strategy": "Iterative deepening A* search"
+      },
+      {
+        "instance": "rearranging tiles in 8-puzzle using least cost path",
+        "strategy": "Uniform cost search"
+      },
+      {
+        "instance": "solving a scrambled 3x3 puzzle with minimal moves",
+        "strategy": "Greedy best-first search"
+      }
+    ]
+  },
+
+  "missionaries_and_cannibals": {
+    "topic": "State-space Search",
+    "instances": [
+      {
+        "instance": "moving 3 missionaries and 3 cannibals across a river safely",
+        "strategy": "Breadth-first search"
+      },
+      {
+        "instance": "finding the sequence of moves for 4 missionaries and 4 cannibals",
+        "strategy": "Depth-first search with pruning of invalid states"
+      },
+      {
+        "instance": "avoiding unsafe states where cannibals outnumber missionaries",
+        "strategy": "Constraint satisfaction with backtracking"
+      },
+      {
+        "instance": "finding minimal crossings to move everyone across the river",
+        "strategy": "Uniform cost search"
+      },
+      {
+        "instance": "solving a variant where the boat carries two people at most",
+        "strategy": "Breadth-first search with state expansion"
+      }
+    ]
+  },
+
+  "vacuum_cleaner": {
+    "topic": "Reflex Agent Search",
+    "instances": [
+      {
+        "instance": "cleaning two rooms A and B where both start dirty",
+        "strategy": "Simple reflex agent strategy"
+      },
+      {
+        "instance": "cleaning a 2x2 grid based on percepts of dirt presence",
+        "strategy": "Model-based reflex agent"
+      },
+      {
+        "instance": "optimizing cleaning time in a four-room environment",
+        "strategy": "Goal-based agent with performance measure"
+      },
+      {
+        "instance": "cleaning 3 connected rooms where dirt reappears randomly",
+        "strategy": "Utility-based agent with randomization"
+      },
+      {
+        "instance": "deciding movement of a reflex agent based on sensor input",
+        "strategy": "Condition–action rule matching"
+      }
+    ]
+  },
+
+  "maze_solving": {
+    "topic": "Search Problem",
+    "instances": [
+      {
+        "instance": "finding the exit from a maze with branching corridors",
+        "strategy": "Depth-first search"
+      },
+      {
+        "instance": "finding the shortest path in a 10x10 maze grid",
+        "strategy": "Breadth-first search"
+      },
+      {
+        "instance": "solving a maze where some passages are blocked",
+        "strategy": "A* search with Manhattan heuristic"
+      },
+      {
+        "instance": "escaping a random maze with one-way paths",
+        "strategy": "Uniform cost search"
+      },
+      {
+        "instance": "solving a labyrinth using iterative deepening",
+        "strategy": "Iterative deepening depth-first search"
+      }
+    ]
+  },
+
+  "planning_robot": {
+    "topic": "Planning Problem",
+    "instances": [
+      {
+        "instance": "planning movements for a robot arm to stack blocks A, B, and C in order",
+        "strategy": "Goal-based planning search"
+      },
+      {
+        "instance": "creating a plan for a warehouse robot to deliver packages to zones 1–3",
+        "strategy": "Hierarchical task network planning"
+      },
+      {
+        "instance": "moving a robotic arm to assemble parts in sequence",
+        "strategy": "Forward state-space planning"
+      },
+      {
+        "instance": "programming a robot to clean rooms in a specific order",
+        "strategy": "Partial-order planning"
+      },
+      {
+        "instance": "coordinating multiple robots to build a structure collaboratively",
+        "strategy": "Multi-agent planning with coordination graph"
+      }
+    ]
+  }
+}
