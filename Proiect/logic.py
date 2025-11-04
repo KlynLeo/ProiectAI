@@ -1,23 +1,43 @@
 import json
 import random
 import re
+from collections import Counter
+import math
+
+ignored_words = {"search", "algorithm", "method", "strategy", "problem", "solution", "with"}
+abbreviations = {
+    "dfs": "depth first search",
+    "bfs": "breadth first search",
+    "ucs": "uniform cost search",
+    "a*": "a star",
+    "astar": "a star",
+    "idfs": "iterative deepening depth first search"
+}
+
+def normalize_text(text):
+    text = text.lower()
+    text = re.sub(r'[^a-zA-Z0-9 ]', '', text)
+    words = text.split()
+    expanded_words = []
+    for w in words:
+        if w in abbreviations:
+            expanded_words.extend(abbreviations[w].split())
+        else:
+            expanded_words.append(w)
+    return [w for w in expanded_words if w not in ignored_words]
 
 def load_bank(path="questions_bank.json"):
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
 def generate_dynamic_question():
-    """Construiește logic o întrebare aleatorie pe baza de template-uri (fără LLM)."""
     data = load_bank()
     problem_key = random.choice(list(data.keys()))
     info = data[problem_key]
-
-    # Alegem o instanță concretă și strategia ei corectă
     instance_info = random.choice(info["instances"])
     instance = instance_info["instance"]
     correct_answer = instance_info["strategy"]
 
-    # Template-uri diferite de formulare
     templates = [
         f"For the problem of {problem_key.replace('_', ' ')}, given {instance}, which search strategy would be most suitable to solve it?",
         f"Given the problem {problem_key.replace('_', ' ')}, and the instance {instance}, which algorithm should be chosen to obtain an optimal solution?",
@@ -27,10 +47,8 @@ def generate_dynamic_question():
         f"Identify the search algorithm that would efficiently solve {problem_key.replace('_', ' ')} if the scenario involves {instance}.",
         f"In artificial intelligence, how would you approach {problem_key.replace('_', ' ')} given {instance}? Which method is most effective?"
     ]
-
     question_text = random.choice(templates)
 
-    # ✅ returnăm obiectul complet
     return {
         "type": "open",
         "problem": problem_key,
@@ -39,18 +57,31 @@ def generate_dynamic_question():
         "answer": correct_answer
     }
 
-# ---------------------------------------------------------------------
-# CLASA PRINCIPALĂ DE EXAMEN
-# ---------------------------------------------------------------------
+def build_synonyms_from_bank(bank):
+    synonyms = {}
+    for problem in bank.values():
+        for inst in problem["instances"]:
+            strategy = inst["strategy"].lower()
+            words = normalize_text(strategy)
+            alt_forms = set()
+            if words:
+                alt_forms.add(" ".join(words))
+                alt_forms.add("".join(words))
+                alt_forms.add(" ".join(words[::-1]))
+                for w in words:
+                    alt_forms.add(w)
+            synonyms[strategy] = list(alt_forms)
+    return synonyms
 
 class Exam:
     def __init__(self):
         self.selected_questions = []
         self.user_answers = []
         self.current_index = 0
+        self.bank = load_bank()
+        self.synonyms = build_synonyms_from_bank(self.bank)
 
     def select_questions(self, num_questions):
-        """Generează un set nou de întrebări dinamice."""
         self.selected_questions = [generate_dynamic_question() for _ in range(num_questions)]
         self.user_answers = [""] * len(self.selected_questions)
         self.current_index = 0
@@ -69,7 +100,6 @@ class Exam:
         return self.current_index >= len(self.selected_questions)
 
     def grade(self):
-        """Calculează scorul mediu al utilizatorului (procentual)."""
         if not self.selected_questions:
             return 0
         scores = [self._compare_answers(ans, q["answer"])
@@ -77,12 +107,22 @@ class Exam:
         return int(sum(scores) / len(scores))
 
     def _compare_answers(self, user_answer, correct_answer):
-        """Compară două răspunsuri simplu, fără LLM: bazat pe cuvinte cheie."""
-        user_answer = re.sub(r'[^a-zA-Z ]', '', user_answer.lower())
-        correct_answer = re.sub(r'[^a-zA-Z ]', '', correct_answer.lower())
-        user_words = set(user_answer.split())
-        correct_words = set(correct_answer.split())
-        if not correct_words:
+        user_words = normalize_text(user_answer)
+        correct_words = normalize_text(correct_answer)
+
+        alt_forms = self.synonyms.get(correct_answer.lower(), [])
+        if any(" ".join(user_words) == s for s in alt_forms):
+            return 100
+  
+        all_words = set(user_words) | set(correct_words)
+        if not all_words:
             return 0
-        overlap = len(user_words & correct_words)
-        return int((overlap / len(correct_words)) * 100)
+        user_counts = Counter(user_words)
+        correct_counts = Counter(correct_words)
+        dot = sum(user_counts[w] * correct_counts[w] for w in all_words)
+        norm_user = math.sqrt(sum(user_counts[w] ** 2 for w in all_words))
+        norm_correct = math.sqrt(sum(correct_counts[w] ** 2 for w in all_words))
+        if norm_user == 0 or norm_correct == 0:
+            return 0
+        cosine = dot / (norm_user * norm_correct)
+        return int(cosine * 100)
