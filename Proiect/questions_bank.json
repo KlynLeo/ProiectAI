@@ -72,7 +72,7 @@
       },
       {
         "instance": "representing the Hanoi state transitions in a search tree",
-        "strategy": "Breadth-first traversal of state space"
+        "strategy": "Breadth-first search traversal of state space"
       }
     ]
   },
