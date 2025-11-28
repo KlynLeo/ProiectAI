@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, font, messagebox
-from logic import Exam
-
+from logic import Exam, get_all_problem_types
+from logic import export_test_to_pdf
 exam = Exam()
 root = tk.Tk()
 root.title("SmarTest - Search Problem Identification")
@@ -25,8 +25,34 @@ num_questions_var = tk.IntVar(value=2)
 num_entry = ttk.Entry(start_frame, textvariable=num_questions_var, font=label_font, width=5)
 num_entry.grid(row=1, column=1, sticky="w", pady=15)
 
+# ---------- Selectarea capitolelor ----------
+tk.Label(start_frame, text="Select Problem Types:",
+         font=label_font, fg="#ECEFF4", bg="#3B4252").grid(row=2, column=0, sticky="w", pady=(20, 5))
+
+chapters_frame = tk.Frame(start_frame, bg="#3B4252")
+chapters_frame.grid(row=3, column=0, columnspan=2, sticky="w")
+
+chapter_vars = {}
+problem_types = get_all_problem_types()
+
+for i, p in enumerate(problem_types):
+    pretty = p.replace("_", " ").title()
+    var = tk.BooleanVar(value=True)
+    chk = tk.Checkbutton(chapters_frame, text=pretty, variable=var,
+                         bg="#3B4252", fg="#ECEFF4", selectcolor="#4C566A",
+                         font=label_font, activebackground="#3B4252")
+    chk.grid(row=i, column=0, sticky="w", pady=2)
+    chapter_vars[p] = var
+
+
 def start_test():
     num_q = num_questions_var.get()
+    selected = [key for key, var in chapter_vars.items() if var.get()]
+    if not selected:
+        messagebox.showwarning("Warning", "Please select at least one problem type.")
+        return
+
+    exam.set_allowed_problems(selected)
     exam.select_questions(num_q)
     start_frame.place_forget()
     show_question()
@@ -34,7 +60,7 @@ def start_test():
 start_btn = tk.Button(start_frame, text="Start Test", font=button_font,
                       bg="#81A1C1", fg="#2E3440", activebackground="#88C0D0",
                       padx=20, pady=10, command=start_test)
-start_btn.grid(row=2, column=0, columnspan=2, pady=35)
+start_btn.grid(row=4, column=0, columnspan=2, pady=35)
 
 question_frame = tk.Frame(root, bg="#3B4252", padx=40, pady=40, relief="groove", bd=2)
 progress = ttk.Progressbar(root, length=900, mode='determinate')
@@ -78,6 +104,7 @@ def show_question():
                                command=lambda: messagebox.showinfo("Correct Answer", q_data["answer"]))
     see_answer_btn.pack(side="left", padx=10)
 
+
 def show_results():
     global question_frame
     question_frame.destroy()
@@ -104,9 +131,23 @@ def show_results():
         tk.Label(q_frame, text=f"Your Answer: {user_ans.strip()}", font=label_font, fg="#EBCB8B", bg="#3B4252", wraplength=850, justify="left").pack(anchor="w", padx=15)
         tk.Label(q_frame, text=f"Score for this question: {percent}%", font=label_font, fg="#D08770", bg="#3B4252").pack(anchor="w", padx=15, pady=(0,5))
     final_score = total_score // num_questions
-    tk.Label(scroll_frame, text=f"Final Score: {final_score}%", font=title_font, fg="#88C0D0", bg="#3B4252").pack(pady=(20,10))
-    end_btn = tk.Button(scroll_frame, text="End Test", font=button_font, bg="#81A1C1", fg="#2E3440",
-                        activebackground="#88C0D0", padx=20, pady=10, command=root.destroy)
+    tk.Label(scroll_frame, text=f"Final Score: {final_score}%", font=title_font,
+         fg="#88C0D0", bg="#3B4252").pack(pady=(20,10))
+     # ======= PDF Export Button ========
+    def export_pdf():
+        filename = export_test_to_pdf(exam.selected_questions)
+        messagebox.showinfo("PDF Exported", f"Test saved as: {filename}")
+
+    pdf_btn = tk.Button(scroll_frame, text="Export Test as PDF",
+                        font=button_font, bg="#88C0D0", fg="#2E3440",
+                        activebackground="#81A1C1", padx=20, pady=10,
+                        command=export_pdf)
+    pdf_btn.pack(pady=10)
+
+    end_btn = tk.Button(scroll_frame, text="End Test", font=button_font,
+                        bg="#81A1C1", fg="#2E3440",
+                        activebackground="#88C0D0",
+                        padx=20, pady=10, command=root.destroy)
     end_btn.pack(pady=20)
 
 root.mainloop()

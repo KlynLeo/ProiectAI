@@ -154,4 +154,23 @@
       }
     ]
   }
+
+  ,
+  "nash_equilibrium": {
+    "topic": "Game Theory",
+    "instances": [
+      {
+        "instance": "Consider the following 2-player game in normal form. Payoffs are (Player1, Player2).\n\n           Player2\n          L        R\nP1 U   (3, 2)   (1, 1)\n   D   (0, 0)   (2, 3)\n\nDoes this game have a pure Nash equilibrium? If yes, which action profile(s) form a pure Nash equilibrium?",
+        "strategy": "Yes, there is a pure Nash equilibrium at (U, L) and another at (D, R)."
+      },
+      {
+        "instance": "Consider the following game. Payoffs are (Row, Column).\n\n           Player2\n          L        R\nP1 U   (2, 2)   (0, 3)\n   D   (3, 0)   (1, 1)\n\nDoes this game have a pure Nash equilibrium? If yes, which one?",
+        "strategy": "Yes, there is a unique pure Nash equilibrium at (D, R)."
+      },
+      {
+        "instance": "Consider the coordination game below. Payoffs are (P1, P2).\n\n           Player2\n          A        B\nP1 A   (4, 4)   (0, 0)\n   B   (0, 0)   (2, 2)\n\nIdentify all pure Nash equilibria of this game.",
+        "strategy": "There are two pure Nash equilibria: (A, A) and (B, B)."
+      }
+    ]
+  }
 }
