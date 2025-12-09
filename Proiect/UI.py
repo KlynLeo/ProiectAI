@@ -46,9 +46,8 @@ num_questions_var = tk.IntVar(value=3)
 num_entry = ttk.Entry(start_frame, textvariable=num_questions_var, font=label_font, width=5)
 num_entry.grid(row=1, column=1, sticky="w", pady=15)
 
-
 # -----------------------------
-# NEW CHECKBOXES (Search + Nash)
+# CHECKBOXES (Search + Nash)
 # -----------------------------
 
 search_var = tk.BooleanVar(value=True)
@@ -65,7 +64,6 @@ tk.Checkbutton(
     font=label_font, fg="#ECEFF4", bg="#3B4252",
     selectcolor="#3B4252", activebackground="#3B4252"
 ).grid(row=3, column=0, sticky="w", pady=5)
-
 
 # -----------------------------
 # START TEST BUTTON
@@ -91,7 +89,6 @@ start_btn = tk.Button(
 )
 start_btn.grid(row=4, column=0, columnspan=2, pady=35)
 
-
 # -----------------------------
 # QUESTION SCREEN
 # -----------------------------
@@ -101,38 +98,52 @@ question_frame = tk.Frame(root, bg="#3B4252", padx=40, pady=40, relief="groove",
 progress = ttk.Progressbar(root, length=900, mode='determinate')
 progress.place(x=50, y=20)
 
-
 def update_progress():
     progress['maximum'] = len(exam.questions)
     progress['value'] = exam.current_index
-
 
 def show_question():
     for widget in question_frame.winfo_children():
         widget.destroy()
 
     question_frame.place(relx=0.5, rely=0.55, anchor="center")
-
     update_progress()
-    q_data = exam.get_current_question()
 
+    q_data = exam.get_current_question()
     if q_data is None:
         show_results()
         return
 
+    # TITLE
     tk.Label(
         question_frame,
         text=f"Question {exam.current_index + 1}/{len(exam.questions)}",
         font=title_font, fg="#ECEFF4", bg="#3B4252"
     ).pack(pady=(0, 10))
 
+    # QUESTION TEXT (normal font)
     tk.Label(
         question_frame,
-        text=q_data['question'],
-        font=label_font, fg="#D8DEE9", bg="#3B4252",
-        wraplength=850, justify="left"
+        text=q_data["question"],
+        font=label_font,
+        fg="#D8DEE9",
+        bg="#3B4252",
+        wraplength=850,
+        justify="left"
+    ).pack(pady=(5, 10))
+
+    # MATRIX (monospace)
+    tk.Label(
+        question_frame,
+        text=q_data["instance"],
+        font=("Courier New", 14),
+        fg="#ECEFF4",
+        bg="#3B4252",
+        justify="left",
+        anchor="w"
     ).pack(pady=(0, 20))
 
+    # ANSWER TEXTBOX
     text_widget = tk.Text(
         question_frame, width=80, height=6,
         font=label_font, bd=2, relief="sunken",
@@ -141,6 +152,7 @@ def show_question():
     )
     text_widget.pack(pady=5)
 
+    # BUTTONS
     btn_frame = tk.Frame(question_frame, bg="#3B4252")
     btn_frame.pack(pady=25)
 
@@ -148,21 +160,18 @@ def show_question():
         exam.submit_answer(text_widget.get("1.0", tk.END))
         show_question()
 
-    next_btn = tk.Button(
+    tk.Button(
         btn_frame, text="Next", font=button_font,
         bg="#81A1C1", fg="#2E3440", activebackground="#88C0D0",
         padx=15, pady=8, command=next_question
-    )
-    next_btn.pack(side="left", padx=10)
+    ).pack(side="left", padx=10)
 
-    show_ans_btn = tk.Button(
+    tk.Button(
         btn_frame, text="Show Correct Answer", font=button_font,
         bg="#5E81AC", fg="#ECEFF4", activebackground="#81A1C1",
         padx=15, pady=8,
         command=lambda: messagebox.showinfo("Correct Answer", q_data["answer"])
-    )
-    show_ans_btn.pack(side="left", padx=10)
-
+    ).pack(side="left", padx=10)
 
 # -----------------------------
 # RESULTS SCREEN
@@ -234,6 +243,5 @@ def show_results():
         activebackground="#88C0D0", padx=20, pady=10,
         command=root.destroy
     ).pack(pady=20)
-
 
 root.mainloop()

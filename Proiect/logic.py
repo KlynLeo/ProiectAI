@@ -2,6 +2,8 @@ import json
 import random
 import re
 from collections import Counter
+from nash_solver import find_pure_nash_equilibria
+from nash_generator import generate_nash
 import math
 
 # -------------------------------
@@ -195,17 +197,19 @@ def format_matrix(matrix, p1="A", p2="B"):
     rows = sorted(set(k[0] for k in matrix))
     cols = sorted(set(k[1] for k in matrix))
 
-    text = f"           Player {p2}\n"
-    text += "           " + "    ".join(cols) + "\n"
+    header = f"           Player {p2}\n"
+    header += "         " + "   ".join(f"{c:>5}" for c in cols) + "\n"
 
+    body = ""
     for r in rows:
-        text += f"Player {p1} {r}   "
+        body += f"Player {p1} {r:<2} "
         for c in cols:
-            payoff = matrix[(r, c)]
-            text += f"{payoff}   "
-        text += "\n"
+            u1, u2 = matrix[(r, c)]
+            body += f"{str((u1, u2)):>7} "
+        body += "\n"
 
-    return text
+    return header + body
+
 
 
 def generate_parametrized_nash_question():
@@ -215,25 +219,29 @@ def generate_parametrized_nash_question():
         generate_parametrized_zero_sum,
     ]
 
-    matrix, nash = random.choice(generators)()
+    matrix, _ = random.choice(generators)()
     instance = format_matrix(matrix)
 
-    if nash:
-        answer = "Pure Nash equilibria: " + ", ".join([str(eq) for eq in nash])
+    computed_nash = find_pure_nash_equilibria(matrix)
+
+    if computed_nash:
+        answer = "Pure Nash equilibria: " + ", ".join(str(eq) for eq in computed_nash)
     else:
         answer = "No pure Nash equilibrium exists"
 
-    question = (
-        "Given the following parametrized game in normal form, determine whether it has a pure Nash equilibrium. "
-        "State all pure Nash equilibria if they exist.\n\n" + instance
-    )
+
+    question_text = (
+    "Given the following parametrized game in normal form, determine whether it has a pure Nash equilibrium. "
+    "State all pure Nash equilibria if they exist."
+)
 
     return {
         "type": "nash",
-        "instance": instance,
-        "question": question,
+        "instance": instance,    
+        "question": question_text, 
         "answer": answer
     }
+
 
 # -------------------------------
 # EXAM CLASS (CU NASH PARAMETRIZAT INTEGRAT)
@@ -247,18 +255,22 @@ class Exam:
         self.current_index = 0
 
     def select_questions(self, num_questions, include_search=True, include_nash=True):
+  # import aici ca să evităm import circular
         self.questions = []
 
         for _ in range(num_questions):
             if include_search and include_nash:
+            # jumătate întrebări SEARCH, jumătate NASH
                 if random.random() < 0.5:
                     self.questions.append(generate_dynamic_search_question(self.bank))
                 else:
-                    self.questions.append(generate_parametrized_nash_question())
+                    self.questions.append(generate_nash())
+
             elif include_search:
                 self.questions.append(generate_dynamic_search_question(self.bank))
+
             elif include_nash:
-                self.questions.append(generate_parametrized_nash_question())
+                self.questions.append(generate_nash())
 
         self.user_answers = [""] * len(self.questions)
         self.current_index = 0
@@ -277,6 +289,10 @@ class Exam:
         return self.current_index >= len(self.questions)
 
     def _compare_answers(self, user_answer, correct_answer):
+        
+        if user_answer.strip() == "":
+            return 0
+        
         user_words = normalize_text(user_answer)
         correct_words = normalize_text(correct_answer)
 
