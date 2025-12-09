@@ -33,7 +33,6 @@ concept_groups = [
     {"constraint satisfaction", "forward checking", "constraint propagation", "mrv"},
 ]
 
-
 def normalize_text(text):
     text = text.lower()
     for abbr, full in abbreviations.items():
@@ -64,7 +63,6 @@ def ngram_similarity(user_words, correct_words, n=2):
 
     return len(user_ngrams & correct_ngrams) / len(correct_ngrams)
 
-
 # -------------------------------
 # DATA LOADING
 # -------------------------------
@@ -73,36 +71,30 @@ def load_bank(path="questions_bank.json"):
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-
 # ------------------------------------------
-# DYNAMIC INSTANCE GENERATORS (CORE FEATURE)
+# DYNAMIC INSTANCE GENERATORS (SEARCH)
 # ------------------------------------------
 
 def generate_search_instance(problem_key, rules):
-    """Generate a dynamic instance + correct strategy based on rules inside JSON."""
-    
-    # --- N Queens ---
+
     if problem_key == "n_queens":
         size = random.choice(rules["board_sizes"])
         instance = f"placing {size} queens on a {size}x{size} chessboard so that none attack each other"
         strategy = random.choice(rules["methods"])
         return instance, strategy
 
-    # --- Graph Coloring ---
     if problem_key == "graph_coloring":
         graph_type = random.choice(rules["graphs"])
         instance = f"coloring the regions of a {graph_type} using 4 colors"
         strategy = random.choice(rules["methods"])
         return instance, strategy
 
-    # --- Tower of Hanoi ---
     if problem_key == "tower_of_hanoi":
         disks = random.choice(rules["disk_counts"])
         instance = f"moving {disks} disks from peg A to peg C using peg B as auxiliary"
         strategy = random.choice(rules["methods"])
         return instance, strategy
 
-    # --- Knight's Tour ---
     if problem_key == "knights_tour":
         board = random.choice(rules["board_sizes"])
         start = (random.randint(0, board-1), random.randint(0, board-1))
@@ -110,43 +102,21 @@ def generate_search_instance(problem_key, rules):
         strategy = random.choice(rules["methods"])
         return instance, strategy
 
-    # --- Pathfinding ---
     if problem_key == "pathfinding":
         size = random.choice(rules["grid_sizes"])
         instance = f"finding the shortest path in a {size}x{size} grid with obstacles"
         strategy = random.choice(rules["methods"])
         return instance, strategy
 
-    # --- 8 Puzzle ---
     if problem_key == "puzzle_8":
         instance = "solving a scrambled 8-puzzle instance"
         strategy = random.choice(rules["methods"])
         return instance, strategy
 
-    # Default fallback (should not happen)
     return "Unknown instance", "Unknown strategy"
 
-
-def generate_nash_question(nash_bank):
-    data = random.choice(nash_bank["examples"])
-    instance = data["instance"]
-    answer = data["strategy"]
-
-    question = (
-        "Given the following game in normal form, determine whether it has a pure Nash equilibrium. "
-        "State all pure Nash equilibria if they exist.\n\n" + instance
-    )
-
-    return {
-        "type": "nash",
-        "instance": instance,
-        "question": question,
-        "answer": answer
-    }
-
-
 # -------------------------------
-# MAIN QUESTION GENERATOR
+# SEARCH QUESTION BUILDER
 # -------------------------------
 
 def generate_dynamic_search_question(bank):
@@ -172,9 +142,101 @@ def generate_dynamic_search_question(bank):
         "answer": answer
     }
 
+# =========================================================
+# ✅✅✅ ADAOS NOU: NASH PARAMETRIZAT REAL (FĂRĂ HARDCOD)
+# =========================================================
+
+def generate_parametrized_prisoners_dilemma():
+    c = random.randint(1, 4)
+    a = random.randint(c + 1, c + 4)
+    b = random.randint(a + 1, a + 5)
+
+    matrix = {
+        ("C", "C"): (a, a),
+        ("C", "D"): (0, b),
+        ("D", "C"): (b, 0),
+        ("D", "D"): (c, c),
+    }
+
+    nash = [("D", "D")]
+
+    return matrix, nash
+
+
+def generate_parametrized_coordination():
+    a = random.randint(3, 7)
+    b = random.randint(3, 7)
+
+    matrix = {
+        ("A", "A"): (a, a),
+        ("A", "B"): (0, 0),
+        ("B", "A"): (0, 0),
+        ("B", "B"): (b, b),
+    }
+
+    nash = [("A", "A"), ("B", "B")]
+    return matrix, nash
+
+
+def generate_parametrized_zero_sum():
+    x = random.randint(2, 6)
+    matrix = {
+        ("H", "H"): (0, 0),
+        ("H", "T"): (x, -x),
+        ("T", "H"): (-x, x),
+        ("T", "T"): (0, 0),
+    }
+
+    nash = []
+    return matrix, nash
+
+
+def format_matrix(matrix, p1="A", p2="B"):
+    rows = sorted(set(k[0] for k in matrix))
+    cols = sorted(set(k[1] for k in matrix))
+
+    text = f"           Player {p2}\n"
+    text += "           " + "    ".join(cols) + "\n"
+
+    for r in rows:
+        text += f"Player {p1} {r}   "
+        for c in cols:
+            payoff = matrix[(r, c)]
+            text += f"{payoff}   "
+        text += "\n"
+
+    return text
+
+
+def generate_parametrized_nash_question():
+    generators = [
+        generate_parametrized_prisoners_dilemma,
+        generate_parametrized_coordination,
+        generate_parametrized_zero_sum,
+    ]
+
+    matrix, nash = random.choice(generators)()
+    instance = format_matrix(matrix)
+
+    if nash:
+        answer = "Pure Nash equilibria: " + ", ".join([str(eq) for eq in nash])
+    else:
+        answer = "No pure Nash equilibrium exists"
+
+    question = (
+        "Given the following parametrized game in normal form, determine whether it has a pure Nash equilibrium. "
+        "State all pure Nash equilibria if they exist.\n\n" + instance
+    )
+
+    return {
+        "type": "nash",
+        "instance": instance,
+        "question": question,
+        "answer": answer
+    }
 
 # -------------------------------
-# EXAM CLASS
+# EXAM CLASS (CU NASH PARAMETRIZAT INTEGRAT)
 # -------------------------------
 
 class Exam:
@@ -186,16 +248,17 @@ class Exam:
 
     def select_questions(self, num_questions, include_search=True, include_nash=True):
         self.questions = []
+
         for _ in range(num_questions):
             if include_search and include_nash:
                 if random.random() < 0.5:
                     self.questions.append(generate_dynamic_search_question(self.bank))
                 else:
-                    self.questions.append(generate_nash_question(self.bank["nash_equilibrium"]))
+                    self.questions.append(generate_parametrized_nash_question())
             elif include_search:
                 self.questions.append(generate_dynamic_search_question(self.bank))
             elif include_nash:
-                self.questions.append(generate_nash_question(self.bank["nash_equilibrium"]))
+                self.questions.append(generate_parametrized_nash_question())
 
         self.user_answers = [""] * len(self.questions)
         self.current_index = 0
@@ -213,9 +276,6 @@ class Exam:
     def is_finished(self):
         return self.current_index >= len(self.questions)
 
-    # -----------------------------
-    # GRADING / ANSWER COMPARISON
-    # -----------------------------
     def _compare_answers(self, user_answer, correct_answer):
         user_words = normalize_text(user_answer)
         correct_words = normalize_text(correct_answer)
@@ -223,25 +283,21 @@ class Exam:
         if " ".join(user_words) == " ".join(correct_words):
             return 100
 
-        # same conceptual group (e.g. both say "DFS" → 80%)
         for group in concept_groups:
             if any(term in user_answer.lower() for term in group) and \
                any(term in correct_answer.lower() for term in group):
                 return 80
 
-        # short meaningful answers
         if len(user_words) <= 3:
             if all(w in correct_words for w in user_words):
                 return 100
             if ngram_similarity(user_words, correct_words) > 0:
                 return 100
 
-        # partial overlap
         overlap = sum(1 for w in user_words if w in correct_words)
         if overlap > 0:
             return int((overlap / len(correct_words)) * 100)
 
-        # cosine similarity fallback
         all_words = set(user_words) | set(correct_words)
         if not all_words:
             return 0
