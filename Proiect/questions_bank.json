@@ -1,176 +1,134 @@
 {
-  "n_queens": {
-    "topic": "Search Problem",
-    "instances": [
-      {
-        "instance": "placing 8 queens on an 8x8 chessboard so that none attack each other",
-        "strategy": "Backtracking with pruning"
+  "search_problems": {
+    "category": "Search Problem",
+    "problems": {
+      "n_queens": {
+        "name": "N Queens",
+        "dynamic_rules": {
+          "board_sizes": [8, 10, 12, 14, 20],
+          "methods": [
+            "Backtracking with pruning",
+            "Backtracking with forward checking",
+            "Backtracking with constraint propagation",
+            "Hill climbing with random restarts",
+            "Depth-first search with pruning"
+          ]
+        },
+        "examples": [
+          {
+            "instance": "placing 8 queens on an 8x8 chessboard so that none attack each other",
+            "strategy": "Backtracking with pruning"
+          }
+        ]
       },
-      {
-        "instance": "solving the 12-queens puzzle on a 12x12 board",
-        "strategy": "Backtracking with forward checking"
+
+      "graph_coloring": {
+        "name": "Graph Coloring",
+        "dynamic_rules": {
+          "graphs": ["map of Europe", "university exam schedule", "social network graph", "radio towers network", "planar graph"],
+          "methods": [
+            "Backtracking with MRV heuristic",
+            "Constraint satisfaction search with forward checking",
+            "Backtracking with constraint propagation",
+            "Least-constraining value heuristic",
+            "Greedy coloring with look-ahead"
+          ]
+        },
+        "examples": [
+          {
+            "instance": "coloring the regions of a map of Europe with 4 colors",
+            "strategy": "Backtracking with MRV heuristic"
+          }
+        ]
       },
-      {
-        "instance": "placing queens on a 20x20 board with diagonal constraint checks",
-        "strategy": "Backtracking optimized with constraint propagation"
+
+      "tower_of_hanoi": {
+        "name": "Tower of Hanoi",
+        "dynamic_rules": {
+          "disk_counts": [3, 4, 5, 6, 7, 8, 10],
+          "methods": [
+            "Recursive depth-first search",
+            "Recursive backtracking search",
+            "Divide and conquer recursion",
+            "Iterative deepening search",
+            "Breadth-first search over state space"
+          ]
+        }
       },
-      {
-        "instance": "solving the 8-queens problem using local optimization and restarts",
-        "strategy": "Hill climbing with random restarts"
+
+      "knights_tour": {
+        "name": "Knight's Tour",
+        "dynamic_rules": {
+          "board_sizes": [5, 6, 8, 10],
+          "methods": [
+            "Depth-first search with backtracking",
+            "Warnsdorff’s heuristic",
+            "Depth-first search with degree heuristic",
+            "Constraint satisfaction search with pruning",
+            "Backtracking with heuristic ordering"
+          ]
+        }
       },
-      {
-        "instance": "finding one valid configuration of queens on a 10x10 board quickly",
-        "strategy": "Depth-first search with pruning"
+
+      "pathfinding": {
+        "name": "Pathfinding",
+        "dynamic_rules": {
+          "grid_sizes": [5, 6, 8, 10],
+          "methods": [
+            "A* search with Manhattan distance",
+            "Dijkstra’s algorithm",
+            "A* search with Euclidean distance",
+            "Depth-first search",
+            "Uniform cost search"
+          ]
+        }
+      },
+
+      "puzzle_8": {
+        "name": "8-Puzzle",
+        "dynamic_rules": {
+          "methods": [
+            "A* search with Manhattan distance heuristic",
+            "A* search with misplaced tiles heuristic",
+            "Iterative deepening A*",
+            "Uniform cost search",
+            "Greedy best-first search"
+          ]
+        }
       }
-    ]
+    }
   },
 
-  "graph_coloring": {
-    "topic": "Constraint Satisfaction Problem",
-    "instances": [
-      {
-        "instance": "coloring the regions of a map of Europe with 4 colors",
-        "strategy": "Backtracking with MRV heuristic"
-      },
-      {
-        "instance": "assigning time slots to university exams to avoid student overlaps",
-        "strategy": "Constraint satisfaction search with forward checking"
-      },
-      {
-        "instance": "coloring nodes of a social network graph to prevent same-color neighbors",
-        "strategy": "Backtracking with constraint propagation"
-      },
-      {
-        "instance": "assigning frequencies to 10 radio towers to avoid interference",
-        "strategy": "Heuristic graph coloring using least-constraining value"
-      },
-      {
-        "instance": "coloring a complex planar graph with minimal colors",
-        "strategy": "Greedy coloring algorithm with look-ahead check"
-      }
-    ]
-  },
-
-  "tower_of_hanoi": {
-    "topic": "Search Problem",
-    "instances": [
-      {
-        "instance": "moving 3 disks from peg A to peg C using peg B as auxiliary",
-        "strategy": "Recursive depth-first search"
-      },
-      {
-        "instance": "solving the Tower of Hanoi for 6 disks efficiently",
-        "strategy": "Recursive backtracking search"
-      },
-      {
-        "instance": "finding minimal moves for 4 disks between three towers",
-        "strategy": "Divide and conquer recursion"
-      },
-      {
-        "instance": "simulating the 10-disk Hanoi problem iteratively",
-        "strategy": "Iterative deepening search"
-      },
-      {
-        "instance": "representing the Hanoi state transitions in a search tree",
-        "strategy": "Breadth-first search traversal of state space"
-      }
-    ]
-  },
-
-  "knights_tour": {
-    "topic": "Search Problem",
-    "instances": [
-      {
-        "instance": "finding a complete knight’s tour on an 8x8 board starting from (0,0)",
-        "strategy": "Depth-first search with backtracking"
-      },
-      {
-        "instance": "constructing a closed knight’s tour that ends where it started",
-        "strategy": "Warnsdorff’s rule heuristic"
-      },
-      {
-        "instance": "solving a 6x6 knight’s tour starting from the center square",
-        "strategy": "Depth-first search with degree heuristic"
-      },
-      {
-        "instance": "computing an open tour for a 10x10 chessboard",
-        "strategy": "Constraint satisfaction search with pruning"
-      },
-      {
-        "instance": "optimizing knight moves to minimize backtracking on a 5x5 board",
-        "strategy": "Backtracking with heuristic ordering"
-      }
-    ]
-  },
-
-  "pathfinding": {
-    "topic": "Heuristic Search",
-    "instances": [
-      {
-        "instance": "finding the shortest path in a 5x5 grid with obstacles",
-        "strategy": "A* search with Manhattan distance heuristic"
-      },
-      {
-        "instance": "navigating a robot in a warehouse with weighted edges",
-        "strategy": "Dijkstra’s algorithm"
-      },
-      {
-        "instance": "finding a low-cost route for a delivery drone in a city graph",
-        "strategy": "A* search with Euclidean distance heuristic"
-      },
-      {
-        "instance": "solving a maze with dead ends and a single goal",
-        "strategy": "Depth-first search"
-      },
-      {
-        "instance": "finding the fastest driving route between two cities",
-        "strategy": "Uniform cost search"
-      }
-    ]
-  },
-
-  "puzzle_8": {
-    "topic": "State-space Search",
-    "instances": [
-      {
-        "instance": "solving the 8-puzzle from the initial state [2,8,3,1,6,4,7,_,5]",
-        "strategy": "A* search with Manhattan distance heuristic"
-      },
-      {
-        "instance": "solving the 15-puzzle using misplaced tile count as heuristic",
-        "strategy": "A* search with misplaced tiles heuristic"
-      },
-      {
-        "instance": "finding an optimal path to the goal state in 8-puzzle",
-        "strategy": "Iterative deepening A* search"
-      },
-      {
-        "instance": "rearranging tiles in 8-puzzle using least cost path",
-        "strategy": "Uniform cost search"
-      },
-      {
-        "instance": "solving a scrambled 3x3 puzzle with minimal moves",
-        "strategy": "Greedy best-first search"
-      }
-    ]
-  }
-
-  ,
   "nash_equilibrium": {
-    "topic": "Game Theory",
-    "instances": [
-      {
-        "instance": "Consider the following 2-player game in normal form. Payoffs are (Player1, Player2).\n\n           Player2\n          L        R\nP1 U   (3, 2)   (1, 1)\n   D   (0, 0)   (2, 3)\n\nDoes this game have a pure Nash equilibrium? If yes, which action profile(s) form a pure Nash equilibrium?",
-        "strategy": "Yes, there is a pure Nash equilibrium at (U, L) and another at (D, R)."
-      },
-      {
-        "instance": "Consider the following game. Payoffs are (Row, Column).\n\n           Player2\n          L        R\nP1 U   (2, 2)   (0, 3)\n   D   (3, 0)   (1, 1)\n\nDoes this game have a pure Nash equilibrium? If yes, which one?",
-        "strategy": "Yes, there is a unique pure Nash equilibrium at (D, R)."
-      },
-      {
-        "instance": "Consider the coordination game below. Payoffs are (P1, P2).\n\n           Player2\n          A        B\nP1 A   (4, 4)   (0, 0)\n   B   (0, 0)   (2, 2)\n\nIdentify all pure Nash equilibria of this game.",
-        "strategy": "There are two pure Nash equilibria: (A, A) and (B, B)."
-      }
-    ]
-  }
+  "category": "Game Theory",
+  "examples": [
+
+    {
+      "instance": "           Player B\n          Deny     Confess\nA Deny   (-1,-1)   (-3,0)\nA Confess (0,-3)   (-2,-2)",
+      "strategy": "Pure Nash equilibrium: (Confess, Confess)"
+    },
+
+    {
+      "instance": "               Player B\n              Stag     Rabbit\nA Stag       (5,5)     (0,3)\nA Rabbit     (3,0)     (4,4)",
+      "strategy": "Pure Nash equilibria: (Stag, Stag) and (Rabbit, Rabbit)"
+    },
+
+    {
+      "instance": "                 Player B\n                 Straight    Turn\nA Straight       (-3,-3)     (3,-2)\nA Turn           (-2,3)      (-3,-3)",
+      "strategy": "Pure Nash equilibria: (Straight, Turn) and (Turn, Straight)"
+    },
+
+    {
+      "instance": "               Keeper\n               Left      Right\nShooter Left  (-1,1)    (1,-1)\nShooter Right (1,-1)    (-1,1)",
+      "strategy": "No pure Nash equilibrium exists"
+    },
+
+    {
+      "instance": "           Player B\n             X        Y\nA X        (1,1)    (2,2)\nA Y        (2,2)    (1,3)",
+      "strategy": "Pure Nash equilibria: (Y, Y), (X, Y), (Y, X)"
+    }
+
+  ]
+}
+
 }
