@@ -1,10 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, font, messagebox
-from logic import Exam
-
-# -----------------------------
-# INITIALIZE EXAM + ROOT WINDOW
-# -----------------------------
+from exam import Exam
+from search_problem_identification.search_logic import compare_search_answers
+from nash_equilibrum.nash_logic import evaluate_nash_answer, extract_equilibria
 
 exam = Exam()
 
@@ -18,10 +16,6 @@ title_font = font.Font(family="Helvetica", size=22, weight="bold")
 label_font = font.Font(family="Helvetica", size=14)
 button_font = font.Font(family="Helvetica", size=14, weight="bold")
 
-# -----------------------------
-# START SCREEN
-# -----------------------------
-
 start_frame = tk.Frame(root, bg="#3B4252", padx=50, pady=50)
 start_frame.place(relx=0.5, rely=0.5, anchor="center")
 
@@ -33,7 +27,6 @@ tk.Label(
     bg="#3B4252"
 ).grid(row=0, column=0, columnspan=2, pady=25)
 
-# Number of Questions
 tk.Label(
     start_frame,
     text="Number of Questions:",
@@ -45,10 +38,6 @@ tk.Label(
 num_questions_var = tk.IntVar(value=3)
 num_entry = ttk.Entry(start_frame, textvariable=num_questions_var, font=label_font, width=5)
 num_entry.grid(row=1, column=1, sticky="w", pady=15)
-
-# -----------------------------
-# CHECKBOXES (Search + Nash)
-# -----------------------------
 
 search_var = tk.BooleanVar(value=True)
 nash_var = tk.BooleanVar(value=True)
@@ -64,10 +53,6 @@ tk.Checkbutton(
     font=label_font, fg="#ECEFF4", bg="#3B4252",
     selectcolor="#3B4252", activebackground="#3B4252"
 ).grid(row=3, column=0, sticky="w", pady=5)
-
-# -----------------------------
-# START TEST BUTTON
-# -----------------------------
 
 def start_test():
     num_q = num_questions_var.get()
@@ -88,10 +73,6 @@ start_btn = tk.Button(
     padx=20, pady=10, command=start_test
 )
 start_btn.grid(row=4, column=0, columnspan=2, pady=35)
-
-# -----------------------------
-# QUESTION SCREEN
-# -----------------------------
 
 question_frame = tk.Frame(root, bg="#3B4252", padx=40, pady=40, relief="groove", bd=2)
 
@@ -114,14 +95,12 @@ def show_question():
         show_results()
         return
 
-    # TITLE
     tk.Label(
         question_frame,
         text=f"Question {exam.current_index + 1}/{len(exam.questions)}",
         font=title_font, fg="#ECEFF4", bg="#3B4252"
     ).pack(pady=(0, 10))
 
-    # QUESTION TEXT (normal font)
     tk.Label(
         question_frame,
         text=q_data["question"],
@@ -132,18 +111,28 @@ def show_question():
         justify="left"
     ).pack(pady=(5, 10))
 
-    # MATRIX (monospace)
-    tk.Label(
-        question_frame,
-        text=q_data["instance"],
-        font=("Courier New", 14),
-        fg="#ECEFF4",
-        bg="#3B4252",
-        justify="left",
-        anchor="w"
-    ).pack(pady=(0, 20))
+    if "instance" in q_data:
+        tk.Label(
+            question_frame,
+            text=q_data["instance"],
+            font=("Courier New", 14),
+            fg="#ECEFF4",
+            bg="#3B4252",
+            justify="left",
+            anchor="w"
+        ).pack(pady=(0, 20))
 
-    # ANSWER TEXTBOX
+    if q_data["type"] == "nash":
+        tk.Label(
+            question_frame,
+            text="Please type your answer as a Python list of tuples, e.g. [(A1, B2)] or [(A1, B2), (A2, B1)]",
+            font=label_font,
+            fg="#EBCB8B",
+            bg="#3B4252",
+            wraplength=850,
+            justify="left"
+        ).pack(pady=(0, 10))
+
     text_widget = tk.Text(
         question_frame, width=80, height=6,
         font=label_font, bd=2, relief="sunken",
@@ -152,7 +141,6 @@ def show_question():
     )
     text_widget.pack(pady=5)
 
-    # BUTTONS
     btn_frame = tk.Frame(question_frame, bg="#3B4252")
     btn_frame.pack(pady=25)
 
@@ -172,10 +160,6 @@ def show_question():
         padx=15, pady=8,
         command=lambda: messagebox.showinfo("Correct Answer", q_data["answer"])
     ).pack(side="left", padx=10)
-
-# -----------------------------
-# RESULTS SCREEN
-# -----------------------------
 
 def show_results():
     question_frame.destroy()
@@ -202,7 +186,12 @@ def show_results():
     total_score = 0
 
     for i, (q, ans) in enumerate(zip(exam.questions, exam.user_answers), 1):
-        score = exam._compare_answers(ans, q["answer"])
+        if q["type"] == "search":
+            score = compare_search_answers(ans, q["answer"])
+        else:
+            correct_eq = extract_equilibria(q["answer"])
+            score = evaluate_nash_answer(ans, correct_eq)
+
         total_score += score
 
         q_frame = tk.Frame(scroll_frame, bg="#3B4252", pady=10, bd=1, relief="solid")

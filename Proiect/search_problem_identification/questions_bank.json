@@ -97,38 +97,6 @@
         }
       }
     }
-  },
-
-  "nash_equilibrium": {
-  "category": "Game Theory",
-  "examples": [
-
-    {
-      "instance": "           Player B\n          Deny     Confess\nA Deny   (-1,-1)   (-3,0)\nA Confess (0,-3)   (-2,-2)",
-      "strategy": "Pure Nash equilibrium: (Confess, Confess)"
-    },
-
-    {
-      "instance": "               Player B\n              Stag     Rabbit\nA Stag       (5,5)     (0,3)\nA Rabbit     (3,0)     (4,4)",
-      "strategy": "Pure Nash equilibria: (Stag, Stag) and (Rabbit, Rabbit)"
-    },
-
-    {
-      "instance": "                 Player B\n                 Straight    Turn\nA Straight       (-3,-3)     (3,-2)\nA Turn           (-2,3)      (-3,-3)",
-      "strategy": "Pure Nash equilibria: (Straight, Turn) and (Turn, Straight)"
-    },
-
-    {
-      "instance": "               Keeper\n               Left      Right\nShooter Left  (-1,1)    (1,-1)\nShooter Right (1,-1)    (-1,1)",
-      "strategy": "No pure Nash equilibrium exists"
-    },
-
-    {
-      "instance": "           Player B\n             X        Y\nA X        (1,1)    (2,2)\nA Y        (2,2)    (1,3)",
-      "strategy": "Pure Nash equilibria: (Y, Y), (X, Y), (Y, X)"
-    }
-
-  ]
-}
+  }
 
 }
