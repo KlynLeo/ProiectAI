@@ -38,13 +38,6 @@ def generate_csp_question():
 
 
 def _parse_user_assignment(text: str) -> Optional[Dict[str, int]]:
-    """
-    Accepts many formats:
-    - {'A': 1, 'B': 2}
-    - {A:1, B:2} (not valid Python, but we try to parse)
-    - A=1, B=2
-    - "None" / "no solution"
-    """
     s = text.strip()
     if not s:
         return None

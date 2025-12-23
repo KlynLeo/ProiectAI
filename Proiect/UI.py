@@ -391,7 +391,7 @@ class QuestionPage(QWidget):
         if q_data.get("type") == "nash":
             self.hint_lbl.setText("Format: a Python list of tuples, e.g. [(A1, B2)] or [(A1, B2), (A2, B1)].")
         elif q_data.get("type") == "csp":
-            self.hint_lbl.setText("Format: {'A': 1, 'B': 3, 'C': 5} or A=1, B=3, C=5. Use 'None' if no solution.")
+            self.hint_lbl.setText("Format: {'A': 1, 'B': 3, 'C': 5}. Use 'None' if no solution.")
         else:
             self.hint_lbl.setText("")
 
