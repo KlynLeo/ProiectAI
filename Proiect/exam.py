@@ -1,4 +1,3 @@
-# exam.py
 import random
 
 # Search imports
@@ -10,15 +9,21 @@ from search_problem_identification.search_logic import (
 
 # Nash imports (3-file architecture)
 from nash_equilibrum.nash_logic import (
-    generate_nash,        
+    generate_nash,
     evaluate_nash_answer,
     extract_equilibria
+)
+
+# CSP imports (new)
+from csp.csp_logic import (
+    generate_csp_question,
+    evaluate_csp_answer,
 )
 
 
 class Exam:
     """
-    Exam manager for multiple question types (search, Nash).
+    Exam manager for multiple question types (search, Nash, CSP).
     """
 
     def __init__(self):
@@ -30,7 +35,7 @@ class Exam:
     # -------------------------------------------------------------
     # Question selection
     # -------------------------------------------------------------
-    def select_questions(self, n, include_search=True, include_nash=True):
+    def select_questions(self, n, include_search=True, include_nash=True, include_csp=True):
         self.questions = []
         enabled = []
 
@@ -38,6 +43,8 @@ class Exam:
             enabled.append("search")
         if include_nash:
             enabled.append("nash")
+        if include_csp:
+            enabled.append("csp")
 
         if not enabled:
             raise ValueError("No question types enabled for exam.")
@@ -49,6 +56,8 @@ class Exam:
                 self.questions.append(generate_dynamic_search_question(self.bank))
             elif qtype == "nash":
                 self.questions.append(generate_nash())
+            elif qtype == "csp":
+                self.questions.append(generate_csp_question())
 
         self.user_answers = [""] * n
         self.current_index = 0
@@ -79,6 +88,9 @@ class Exam:
         correct_eq = extract_equilibria(q["answer"])
         return evaluate_nash_answer(user_ans, correct_eq)
 
+    def _grade_csp(self, user_ans, q):
+        return evaluate_csp_answer(user_ans, q["answer"])
+
     def grade(self):
         if not self.questions:
             return 0
@@ -90,6 +102,9 @@ class Exam:
                 total += self._grade_search(user_ans, q)
             elif q["type"] == "nash":
                 total += self._grade_nash(user_ans, q)
+            elif q["type"] == "csp":
+                total += self._grade_csp(user_ans, q)
             else:
                 raise ValueError(f"Unknown question type: {q['type']}")
+
         return total // len(self.questions)
