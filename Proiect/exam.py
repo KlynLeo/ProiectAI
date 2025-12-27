@@ -20,6 +20,19 @@ from csp.csp_logic import (
     evaluate_csp_answer,
 )
 
+from exam_history import append_exam
+
+
+def _json_safe_question(q: dict) -> dict:
+        safe = {}
+
+        for k, v in q.items():
+            if isinstance(v, (dict, list, str, int, float)) or v is None:
+                safe[k] = v
+            else:
+                safe[k] = str(v)
+        return safe
+
 
 class Exam:
     """
@@ -35,6 +48,8 @@ class Exam:
     # -------------------------------------------------------------
     # Question selection
     # -------------------------------------------------------------
+
+
     def select_questions(self, n, include_search=True, include_nash=True, include_csp=True):
         self.questions = []
         enabled = []
@@ -61,6 +76,9 @@ class Exam:
 
         self.user_answers = [""] * n
         self.current_index = 0
+        json_questions = [_json_safe_question(q) for q in self.questions]
+        append_exam(json_questions)
+
 
     # -------------------------------------------------------------
     # Question navigation

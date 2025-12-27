@@ -42,50 +42,41 @@ def _parse_user_assignment(text: str) -> Optional[Dict[str, int]]:
     if not s:
         return None
 
-    if re.search(r"\b(none|no solution|unsat|infeasible)\b", s.lower()):
-        return None
-
-    # Try Python dict literal first
     try:
         obj = ast.literal_eval(s)
         if isinstance(obj, dict):
-            parsed = {}
-            for k, v in obj.items():
-                kk = str(k).strip().upper()
-                parsed[kk] = int(v)
-            return parsed
-    except:
+            return {
+                str(k).strip().upper(): int(v)
+                for k, v in obj.items()
+            }
+    except Exception:
         pass
 
-    # Try "A=1, B=2"
-    pairs = re.findall(r"([A-Za-z])\s*=\s*(-?\d+)", s)
+    pairs = re.findall(r"\b([A-Za-z])\s*=\s*(-?\d+)\b", s)
     if pairs:
-        d = {}
-        for k, v in pairs:
-            d[k.strip().upper()] = int(v)
-        return d
+        return {k.upper(): int(v) for k, v in pairs}
 
     return None
 
 
 def evaluate_csp_answer(user_answer: str, correct_answer: str) -> int:
-    user_parsed = _parse_user_assignment(user_answer)
+    raw = user_answer.strip().lower()
+    user_says_none = bool(
+        re.fullmatch(r"(none|no solution|unsat|infeasible)", raw)
+    )
 
-    # correct_answer is canonical: "{'A': 1, 'B': 2}" or "None"
+    user_parsed = _parse_user_assignment(user_answer)
     correct_sol = None if correct_answer.strip() == "None" else ast.literal_eval(correct_answer)
 
-    if correct_sol is None and user_parsed is None:
-        return 100
+    if correct_sol is None:
+        return 100 if user_says_none else 0
 
-    if correct_sol is None and user_parsed is not None:
+    if user_parsed is None:
         return 0
 
-    if correct_sol is not None and user_parsed is None:
-        return 0
+    correct_norm = {
+        str(k).strip().upper(): int(v)
+        for k, v in correct_sol.items()
+    }
 
-    # Compare dicts case-insensitively on keys (we stored keys upper)
-    correct_norm = {str(k).strip().upper(): int(v) for k, v in correct_sol.items()}
-    if user_parsed == correct_norm:
-        return 100
-
-    return 0
+    return 100 if user_parsed == correct_norm else 0
