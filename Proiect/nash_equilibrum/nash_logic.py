@@ -55,46 +55,34 @@ def evaluate_nash_answer(user_answer, correct_equilibria):
     user_says_yes = bool(re.search(r'\byes\b', user_answer.lower()))
     correct_has_none = len(correct_equilibria) == 0
 
-    # Case 1: No equilibrium exists
     if correct_has_none:
         return 100 if user_says_no else 0
 
-    # Case 2: User says "no" but equilibria exist
     if user_says_no:
         return 0
 
-    # Case 3: Extract user's equilibria
     user_eq = extract_equilibria(user_answer)
     
-    # If user just says "yes" without providing equilibria
     if user_says_yes and not user_eq:
         return 30
     
-    # If no equilibria extracted
     if not user_eq:
         return 0
     
-    # Case 4: Perfect match (all correct, no extras)
     if set(user_eq) == set(correct_equilibria):
         return 100
     
-    # Case 5: Partial credit with penalty for wrong answers
     user_set = set(user_eq)
     correct_set = set(correct_equilibria)
     
-    correct_found = user_set & correct_set  # intersection
-    wrong_provided = user_set - correct_set  # user gave but aren't correct
-    missed = correct_set - user_set  # correct ones user didn't find
+    correct_found = user_set & correct_set 
+    wrong_provided = user_set - correct_set  
     
-    # No correct answers found
     if not correct_found:
         return 0
-    
-    # Calculate score with penalty
-    # Base score: proportion of correct equilibria found
+
     base_score = (len(correct_found) / len(correct_equilibria)) * 100
     
-    # Penalty: -10 points for each wrong equilibrium provided
     penalty = len(wrong_provided) * 10
     
     final_score = max(0, int(base_score - penalty))

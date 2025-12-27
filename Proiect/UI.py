@@ -1,224 +1,254 @@
-import tkinter as tk
-from tkinter import ttk, font, messagebox
+import sys
+
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont, QFontDatabase
+from PySide6.QtWidgets import (
+    QApplication, QMainWindow, QWidget, QStackedWidget,
+    QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QCheckBox,
+    QSpinBox, QMessageBox, QTextEdit, QProgressBar, QScrollArea,
+    QFrame, QSplitter
+)
 
 from exam import Exam
 from search_problem_identification.search_logic import compare_search_answers
 from nash_equilibrum.nash_logic import evaluate_nash_answer, extract_equilibria
 from minimax.minimax_logic import evaluate_minimax_answer
+from csp.csp_logic import evaluate_csp_answer
 
-# =====================
-# INIT EXAM
-# =====================
-exam = Exam()
 
-# =====================
-# MAIN WINDOW
-# =====================
-root = tk.Tk()
-root.title("SmarTest - Search Problem Identification & Game Theory")
-root.geometry("1000x650")
-root.configure(bg="#2E3440")
-root.resizable(False, False)
+# -------------------------
+# Theme
+# -------------------------
+APP_STYLESHEET = """
+QMainWindow { background: #0B1220; }
+QWidget { color: #E8EEF7; font-size: 14px; }
+QFrame#Card {
+    background: #101A2E;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+}
+QFrame#SubCard {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+}
+QLabel#Title { font-size: 28px; font-weight: 700; }
+QLabel#Section { font-weight: 700; }
+QLabel#Badge {
+    padding: 6px 10px;
+    border-radius: 10px;
+    background: rgba(136,192,208,0.2);
+    border: 1px solid rgba(136,192,208,0.4);
+}
+QPushButton {
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-weight: 700;
+}
+QPushButton#Primary {
+    background: rgba(136,192,208,0.3);
+    border: 1px solid rgba(136,192,208,0.6);
+}
+"""
 
-title_font = font.Font(family="Helvetica", size=22, weight="bold")
-label_font = font.Font(family="Helvetica", size=14)
-button_font = font.Font(family="Helvetica", size=14, weight="bold")
 
-# =====================
-# START FRAME
-# =====================
-start_frame = tk.Frame(root, bg="#3B4252", padx=50, pady=50)
-start_frame.place(relx=0.5, rely=0.5, anchor="center")
+def wrap_scroll(widget: QWidget) -> QScrollArea:
+    s = QScrollArea()
+    s.setWidgetResizable(True)
+    s.setWidget(widget)
+    return s
 
-tk.Label(
-    start_frame,
-    text="SmarTest - Question Generator",
-    font=title_font,
-    fg="#ECEFF4",
-    bg="#3B4252"
-).grid(row=0, column=0, columnspan=2, pady=25)
 
-tk.Label(
-    start_frame,
-    text="Number of Questions:",
-    font=label_font,
-    fg="#ECEFF4",
-    bg="#3B4252"
-).grid(row=1, column=0, sticky="w", pady=15)
+def score_question(q, ans: str) -> int:
+    if q["type"] == "search":
+        return compare_search_answers(ans, q["answer"])
+    if q["type"] == "nash":
+        return evaluate_nash_answer(ans, extract_equilibria(q["answer"]))
+    if q["type"] == "minimax":
+        return evaluate_minimax_answer(ans, q["answer"])
+    if q["type"] == "csp":
+        return evaluate_csp_answer(ans, q["answer"])
+    return 0
 
-num_questions_var = tk.IntVar(value=3)
-num_entry = ttk.Entry(start_frame, textvariable=num_questions_var, font=label_font, width=5)
-num_entry.grid(row=1, column=1, sticky="w", pady=15)
 
-# =====================
-# CHECKBOXES
-# =====================
-search_var = tk.BooleanVar(value=True)
-nash_var = tk.BooleanVar(value=True)
-minimax_var = tk.BooleanVar(value=True)
+# -------------------------
+# Pages
+# -------------------------
+class StartPage(QWidget):
+    def __init__(self, on_start):
+        super().__init__()
+        self.on_start = on_start
 
-tk.Checkbutton(
-    start_frame, text="Search Problems", variable=search_var,
-    font=label_font, fg="#ECEFF4", bg="#3B4252",
-    selectcolor="#3B4252", activebackground="#3B4252"
-).grid(row=2, column=0, sticky="w", pady=5)
+        root = QVBoxLayout(self)
 
-tk.Checkbutton(
-    start_frame, text="Nash Equilibrium", variable=nash_var,
-    font=label_font, fg="#ECEFF4", bg="#3B4252",
-    selectcolor="#3B4252", activebackground="#3B4252"
-).grid(row=3, column=0, sticky="w", pady=5)
+        card = QFrame()
+        card.setObjectName("Card")
+        layout = QVBoxLayout(card)
 
-tk.Checkbutton(
-    start_frame, text="Minimax (Alpha-Beta)", variable=minimax_var,
-    font=label_font, fg="#ECEFF4", bg="#3B4252",
-    selectcolor="#3B4252", activebackground="#3B4252"
-).grid(row=4, column=0, sticky="w", pady=5)
+        title = QLabel("SmarTest")
+        title.setObjectName("Title")
+        layout.addWidget(title)
 
-# =====================
-# START TEST
-# =====================
-def start_test():
-    num_q = num_questions_var.get()
+        self.spin = QSpinBox()
+        self.spin.setRange(1, 50)
+        self.spin.setValue(5)
+        layout.addWidget(self.spin)
 
-    if not (search_var.get() or nash_var.get() or minimax_var.get()):
-        messagebox.showerror("Error", "Please select at least one problem type.")
-        return
+        self.cb_search = QCheckBox("Search")
+        self.cb_nash = QCheckBox("Nash")
+        self.cb_minimax = QCheckBox("Minimax (Alpha-Beta)")
+        self.cb_csp = QCheckBox("CSP")
 
-    exam.select_questions(
-        num_q,
-        include_search=search_var.get(),
-        include_nash=nash_var.get(),
-        include_minimax=minimax_var.get()
-    )
+        for cb in (self.cb_search, self.cb_nash, self.cb_minimax, self.cb_csp):
+            cb.setChecked(True)
+            layout.addWidget(cb)
 
-    start_frame.place_forget()
-    show_question()
+        btn = QPushButton("Start Test")
+        btn.setObjectName("Primary")
+        btn.clicked.connect(self.start)
+        layout.addWidget(btn)
 
-start_btn = tk.Button(
-    start_frame, text="Start Test", font=button_font,
-    bg="#81A1C1", fg="#2E3440", activebackground="#88C0D0",
-    padx=20, pady=10, command=start_test
-)
-start_btn.grid(row=5, column=0, columnspan=2, pady=35)
+        root.addWidget(card, alignment=Qt.AlignCenter)
 
-# =====================
-# QUESTION FRAME
-# =====================
-question_frame = tk.Frame(root, bg="#3B4252", padx=40, pady=40, relief="groove", bd=2)
+    def start(self):
+        if not any([self.cb_search.isChecked(), self.cb_nash.isChecked(),
+                    self.cb_minimax.isChecked(), self.cb_csp.isChecked()]):
+            QMessageBox.critical(self, "Error", "Select at least one type")
+            return
 
-progress = ttk.Progressbar(root, length=900, mode='determinate')
-progress.place(x=50, y=20)
+        self.on_start(
+            self.spin.value(),
+            self.cb_search.isChecked(),
+            self.cb_nash.isChecked(),
+            self.cb_minimax.isChecked(),
+            self.cb_csp.isChecked()
+        )
 
-def update_progress():
-    progress['maximum'] = len(exam.questions)
-    progress['value'] = exam.current_index
 
-def show_question():
-    for widget in question_frame.winfo_children():
-        widget.destroy()
+class QuestionPage(QWidget):
+    def __init__(self, on_next, on_show):
+        super().__init__()
+        self.on_next = on_next
+        self.on_show = on_show
 
-    question_frame.place(relx=0.5, rely=0.55, anchor="center")
-    update_progress()
+        root = QVBoxLayout(self)
 
-    q_data = exam.get_current_question()
-    if q_data is None:
-        show_results()
-        return
+        self.progress = QProgressBar()
+        root.addWidget(self.progress)
 
-    tk.Label(
-        question_frame,
-        text=f"Question {exam.current_index + 1}/{len(exam.questions)}",
-        font=title_font, fg="#ECEFF4", bg="#3B4252"
-    ).pack(pady=(0, 10))
+        splitter = QSplitter()
+        root.addWidget(splitter, 1)
 
-    tk.Label(
-        question_frame,
-        text=q_data["question"],
-        font=label_font,
-        fg="#D8DEE9",
-        bg="#3B4252",
-        wraplength=850,
-        justify="left"
-    ).pack(pady=(5, 10))
+        left = QTextEdit()
+        left.setReadOnly(True)
+        splitter.addWidget(left)
+        self.problem = left
 
-    if "instance" in q_data:
-        tk.Label(
-            question_frame,
-            text=q_data["instance"],
-            font=("Courier New", 14),
-            fg="#ECEFF4",
-            bg="#3B4252",
-            justify="left",
-            anchor="w"
-        ).pack(pady=(0, 20))
+        right = QTextEdit()
+        splitter.addWidget(right)
+        self.answer = right
 
-    text_widget = tk.Text(
-        question_frame, width=80, height=6,
-        font=label_font, bd=2, relief="sunken",
-        padx=5, pady=5, wrap="word",
-        bg="#ECEFF4", fg="#2E3440"
-    )
-    text_widget.pack(pady=5)
+        btns = QHBoxLayout()
+        show = QPushButton("Show Answer")
+        show.clicked.connect(self.on_show)
+        nextb = QPushButton("Next")
+        nextb.setObjectName("Primary")
+        nextb.clicked.connect(lambda: self.on_next(self.answer.toPlainText()))
+        btns.addWidget(show)
+        btns.addStretch(1)
+        btns.addWidget(nextb)
 
-    def next_question():
-        exam.submit_answer(text_widget.get("1.0", tk.END))
-        show_question()
+        root.addLayout(btns)
 
-    btn_frame = tk.Frame(question_frame, bg="#3B4252")
-    btn_frame.pack(pady=25)
+    def set_question(self, idx, total, q):
+        self.progress.setMaximum(total)
+        self.progress.setValue(idx - 1)
+        self.problem.setPlainText(f"{q['question']}\n\n{q.get('instance','')}")
+        self.answer.clear()
 
-    tk.Button(
-        btn_frame, text="Next", font=button_font,
-        bg="#81A1C1", fg="#2E3440", activebackground="#88C0D0",
-        padx=15, pady=8, command=next_question
-    ).pack(side="left", padx=10)
 
-    tk.Button(
-        btn_frame, text="Show Correct Answer", font=button_font,
-        bg="#5E81AC", fg="#ECEFF4", activebackground="#81A1C1",
-        padx=15, pady=8,
-        command=lambda: messagebox.showinfo("Correct Answer", q_data["answer"])
-    ).pack(side="left", padx=10)
+class ResultsPage(QWidget):
+    def __init__(self, on_restart):
+        super().__init__()
+        self.on_restart = on_restart
 
-# =====================
-# RESULTS
-# =====================
-def show_results():
-    question_frame.destroy()
+        root = QVBoxLayout(self)
+        self.score = QLabel("Final Score: 0%")
+        self.score.setObjectName("Title")
+        root.addWidget(self.score)
 
-    score_frame = tk.Frame(root, bg="#3B4252", padx=40, pady=40)
-    score_frame.place(relx=0.5, rely=0.5, anchor="center")
+        self.list = QVBoxLayout()
+        host = QWidget()
+        host.setLayout(self.list)
+        root.addWidget(wrap_scroll(host), 1)
 
-    tk.Label(
-        score_frame, text="Test Finished",
-        font=title_font, fg="#ECEFF4", bg="#3B4252"
-    ).pack(pady=(0, 20))
+        btn = QPushButton("Restart")
+        btn.setObjectName("Primary")
+        btn.clicked.connect(self.on_restart)
+        root.addWidget(btn)
 
-    total_score = 0
+    def set_results(self, qs, ans):
+        total = 0
+        for q, a in zip(qs, ans):
+            s = score_question(q, a)
+            total += s
+            lbl = QLabel(f"{q['question']} → {s}%")
+            self.list.addWidget(lbl)
+        self.score.setText(f"Final Score: {total // len(qs)}%")
 
-    for q, ans in zip(exam.questions, exam.user_answers):
-        if q["type"] == "search":
-            score = compare_search_answers(ans, q["answer"])
-        elif q["type"] == "nash":
-            score = evaluate_nash_answer(ans, extract_equilibria(q["answer"]))
-        else:  # minimax
-            score = evaluate_minimax_answer(ans, q["answer"])
 
-        total_score += score
+# -------------------------
+# Main
+# -------------------------
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.exam = Exam()
 
-    final_score = total_score // len(exam.questions)
+        self.stack = QStackedWidget()
+        self.setCentralWidget(self.stack)
 
-    tk.Label(
-        score_frame, text=f"Final Score: {final_score}%",
-        font=title_font, fg="#88C0D0", bg="#3B4252"
-    ).pack(pady=20)
+        self.start = StartPage(self.start_test)
+        self.qpage = QuestionPage(self.next_q, self.show_ans)
+        self.results = ResultsPage(self.restart)
 
-    tk.Button(
-        score_frame, text="End Test", font=button_font,
-        bg="#81A1C1", fg="#2E3440",
-        activebackground="#88C0D0", padx=20, pady=10,
-        command=root.destroy
-    ).pack(pady=20)
+        for w in (self.start, self.qpage, self.results):
+            self.stack.addWidget(w)
 
-root.mainloop()
+        self.stack.setCurrentWidget(self.start)
+
+    def start_test(self, n, s, nash, m, csp):
+        self.exam.select_questions(n, s, nash, m, csp)
+        self.stack.setCurrentWidget(self.qpage)
+        self.render()
+
+    def render(self):
+        q = self.exam.get_current_question()
+        if q is None:
+            self.results.set_results(self.exam.questions, self.exam.user_answers)
+            self.stack.setCurrentWidget(self.results)
+            return
+        self.qpage.set_question(self.exam.current_index + 1, len(self.exam.questions), q)
+
+    def next_q(self, txt):
+        self.exam.submit_answer(txt)
+        self.render()
+
+    def show_ans(self):
+        q = self.exam.get_current_question()
+        QMessageBox.information(self, "Answer", q["answer"])
+
+    def restart(self):
+        self.stack.setCurrentWidget(self.start)
+
+
+def main():
+    app = QApplication(sys.argv)
+    app.setStyleSheet(APP_STYLESHEET)
+    win = MainWindow()
+    win.show()
+    sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()

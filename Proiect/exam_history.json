@@ -1,0 +1,83 @@
+{
+  "exams": [
+    {
+      "timestamp": "2025-12-27T11:51:32",
+      "questions": [
+        {
+          "type": "csp",
+          "algorithm": "MRV",
+          "question": "Given the following CSP (variables, domains, constraints, and a partial assignment), what will be the final assignment of the remaining variables if we use Backtracking with the optimization MRV?",
+          "instance": "Variables: A, B, C, D\nDomains:\n  A ∈ [4, 6]\n  B ∈ [1, 4, 5]\n  C ∈ [2, 4, 5, 6]\n  D ∈ [2, 4, 5]\nConstraints:\n  B >= D\n  B != C\n  A != B\n  A != D\n  A < B\n  B < A\nPartial assignment:\n  C = 2",
+          "answer": "None"
+        },
+        {
+          "type": "search",
+          "problem_key": "knights_tour",
+          "instance": "finding a complete knight’s tour on a 6x6 board starting from (3, 4)",
+          "question": "For the problem Knight's Tour, given finding a complete knight’s tour on a 6x6 board starting from (3, 4), which search strategy is most suitable?",
+          "answer": "Constraint satisfaction search with pruning"
+        },
+        {
+          "type": "csp",
+          "algorithm": "FC",
+          "question": "Given the following CSP (variables, domains, constraints, and a partial assignment), what will be the final assignment of the remaining variables if we use Backtracking with the optimization FC?",
+          "instance": "Variables: A, B, C, D\nDomains:\n  A ∈ [4, 5]\n  B ∈ [1, 2, 3]\n  C ∈ [1, 5, 6]\n  D ∈ [2, 3, 6]\nConstraints:\n  C != D\n  A <= C\n  A != B\n  C < D\n  D < C\nPartial assignment:\n  A = 5",
+          "answer": "None"
+        },
+        {
+          "type": "csp",
+          "algorithm": "MRV",
+          "question": "Given the following CSP (variables, domains, constraints, and a partial assignment), what will be the final assignment of the remaining variables if we use Backtracking with the optimization MRV?",
+          "instance": "Variables: A, B, C, D\nDomains:\n  A ∈ [1, 6]\n  B ∈ [1, 2, 4]\n  C ∈ [1, 4]\n  D ∈ [1, 3, 4, 6]\nConstraints:\n  B != C\n  A >= B\n  B <= D\n  A > C\n  A >= D\n  C < D\n  A < D\n  D < A\nPartial assignment:\n  C = 1",
+          "answer": "None"
+        },
+        {
+          "type": "search",
+          "problem_key": "tower_of_hanoi",
+          "instance": "moving 8 disks from peg A to peg C using peg B as auxiliary",
+          "question": "For the problem Tower of Hanoi, given moving 8 disks from peg A to peg C using peg B as auxiliary, which search strategy is most suitable?",
+          "answer": "Recursive depth-first search"
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-12-27T11:59:04",
+      "questions": [
+        {
+          "type": "csp",
+          "algorithm": "AC-3",
+          "question": "Given the following CSP (variables, domains, constraints, and a partial assignment), what will be the final assignment of the remaining variables if we use Backtracking with the optimization AC-3?",
+          "instance": "Variables: A, B, C, D\nDomains:\n  A ∈ [1, 3, 5, 6]\n  B ∈ [3, 4, 5, 6]\n  C ∈ [2, 4]\n  D ∈ [1, 2, 5]\nConstraints:\n  B > D\n  A != B\n  C > D\n  A > D\n  A != C\n  B <= C\nPartial assignment:\n  D = 1",
+          "answer": "{'A': 3, 'B': 4, 'C': 4, 'D': 1}"
+        },
+        {
+          "type": "search",
+          "problem_key": "puzzle_8",
+          "instance": "solving a scrambled 8-puzzle instance",
+          "question": "For the problem 8-Puzzle, given solving a scrambled 8-puzzle instance, which search strategy is most suitable?",
+          "answer": "A* search with Manhattan distance heuristic"
+        },
+        {
+          "type": "csp",
+          "algorithm": "MRV",
+          "question": "Given the following CSP (variables, domains, constraints, and a partial assignment), what will be the final assignment of the remaining variables if we use Backtracking with the optimization MRV?",
+          "instance": "Variables: A, B, C, D\nDomains:\n  A ∈ [3, 4, 5, 6]\n  B ∈ [1, 4, 6]\n  C ∈ [3, 4, 5, 6]\n  D ∈ [2, 4, 5, 6]\nConstraints:\n  A != B\n  B <= D\n  A <= D\n  C < D\nPartial assignment:\n  C = 3",
+          "answer": "{'A': 3, 'B': 1, 'C': 3, 'D': 4}"
+        },
+        {
+          "type": "search",
+          "problem_key": "puzzle_8",
+          "instance": "solving a scrambled 8-puzzle instance",
+          "question": "Given solving a scrambled 8-puzzle instance, what is the optimal search method for solving 8-Puzzle?",
+          "answer": "Iterative deepening A*"
+        },
+        {
+          "type": "nash",
+          "instance": "            Player B\n                B1      B2\nPlayer A A1  (1, -1)  (-1, 1)  \nPlayer A A2  (-1, 1)  (1, -1)  \n",
+          "question": "Given the following normal-form game, determine whether it has a pure Nash equilibrium. State all equilibria if they exist.",
+          "answer": "No pure Nash equilibrium exists"
+        }
+      ]
+    }
+  ]
+}
