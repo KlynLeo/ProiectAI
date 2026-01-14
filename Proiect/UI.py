@@ -1,7 +1,6 @@
 import sys
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont, QFontDatabase
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QStackedWidget,
     QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QCheckBox,
@@ -16,38 +15,85 @@ from minimax.minimax_logic import evaluate_minimax_answer
 from csp.csp_logic import evaluate_csp_answer
 
 
-# -------------------------
-# Theme
-# -------------------------
+# -------------------------------------------------
+# THEME (dark blue, readable)
+# -------------------------------------------------
 APP_STYLESHEET = """
-QMainWindow { background: #0B1220; }
-QWidget { color: #E8EEF7; font-size: 14px; }
+QMainWindow {
+    background: #0D1B2A;
+}
+
+QWidget {
+    color: #E6EDF6;
+    font-size: 14px;
+}
+
+/* Cards */
 QFrame#Card {
-    background: #101A2E;
-    border: 1px solid rgba(255,255,255,0.08);
+    background: #1B263B;
+    border: 1px solid #415A77;
     border-radius: 16px;
 }
-QFrame#SubCard {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 14px;
+
+/* Titles */
+QLabel#Title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #E6EDF6;
 }
-QLabel#Title { font-size: 28px; font-weight: 700; }
-QLabel#Section { font-weight: 700; }
-QLabel#Badge {
-    padding: 6px 10px;
-    border-radius: 10px;
-    background: rgba(136,192,208,0.2);
-    border: 1px solid rgba(136,192,208,0.4);
+
+QLabel {
+    color: #E6EDF6;
 }
+
+/* Inputs */
+QTextEdit, QLineEdit {
+    background: #FFFFFF;
+    color: #000000;
+    border: 1px solid #778DA9;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+QSpinBox {
+    background: #FFFFFF;
+    color: #000000;
+    border: 1px solid #778DA9;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+/* Checkboxes */
+QCheckBox {
+    color: #E6EDF6;
+}
+
+/* Progress bar */
+QProgressBar {
+    background: #1B263B;
+    border: 1px solid #415A77;
+    border-radius: 6px;
+    text-align: center;
+}
+
+QProgressBar::chunk {
+    background-color: #4F7DF3;
+}
+
+/* Buttons */
 QPushButton {
     border-radius: 12px;
     padding: 10px 14px;
     font-weight: 700;
+    background: #415A77;
+    color: #E6EDF6;
+    border: 1px solid #778DA9;
 }
+
 QPushButton#Primary {
-    background: rgba(136,192,208,0.3);
-    border: 1px solid rgba(136,192,208,0.6);
+    background: #4F7DF3;
+    color: #FFFFFF;
+    border: none;
 }
 """
 
@@ -71,16 +117,15 @@ def score_question(q, ans: str) -> int:
     return 0
 
 
-# -------------------------
-# Pages
-# -------------------------
+# -------------------------------------------------
+# START PAGE
+# -------------------------------------------------
 class StartPage(QWidget):
     def __init__(self, on_start):
         super().__init__()
         self.on_start = on_start
 
         root = QVBoxLayout(self)
-
         card = QFrame()
         card.setObjectName("Card")
         layout = QVBoxLayout(card)
@@ -125,6 +170,9 @@ class StartPage(QWidget):
         )
 
 
+# -------------------------------------------------
+# QUESTION PAGE
+# -------------------------------------------------
 class QuestionPage(QWidget):
     def __init__(self, on_next, on_show):
         super().__init__()
@@ -139,40 +187,43 @@ class QuestionPage(QWidget):
         splitter = QSplitter()
         root.addWidget(splitter, 1)
 
-        left = QTextEdit()
-        left.setReadOnly(True)
-        splitter.addWidget(left)
-        self.problem = left
+        self.problem = QTextEdit()
+        self.problem.setReadOnly(True)
+        splitter.addWidget(self.problem)
 
-        right = QTextEdit()
-        splitter.addWidget(right)
-        self.answer = right
+        self.answer = QTextEdit()
+        splitter.addWidget(self.answer)
 
         btns = QHBoxLayout()
         show = QPushButton("Show Answer")
         show.clicked.connect(self.on_show)
+
         nextb = QPushButton("Next")
         nextb.setObjectName("Primary")
         nextb.clicked.connect(lambda: self.on_next(self.answer.toPlainText()))
+
         btns.addWidget(show)
         btns.addStretch(1)
         btns.addWidget(nextb)
-
         root.addLayout(btns)
 
     def set_question(self, idx, total, q):
         self.progress.setMaximum(total)
         self.progress.setValue(idx - 1)
-        self.problem.setPlainText(f"{q['question']}\n\n{q.get('instance','')}")
+        self.problem.setPlainText(f"{q['question']}\n\n{q.get('instance', '')}")
         self.answer.clear()
 
 
+# -------------------------------------------------
+# RESULTS PAGE
+# -------------------------------------------------
 class ResultsPage(QWidget):
     def __init__(self, on_restart):
         super().__init__()
         self.on_restart = on_restart
 
         root = QVBoxLayout(self)
+
         self.score = QLabel("Final Score: 0%")
         self.score.setObjectName("Title")
         root.addWidget(self.score)
@@ -180,6 +231,7 @@ class ResultsPage(QWidget):
         self.list = QVBoxLayout()
         host = QWidget()
         host.setLayout(self.list)
+
         root.addWidget(wrap_scroll(host), 1)
 
         btn = QPushButton("Restart")
@@ -188,18 +240,40 @@ class ResultsPage(QWidget):
         root.addWidget(btn)
 
     def set_results(self, qs, ans):
+        while self.list.count():
+            item = self.list.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
         total = 0
-        for q, a in zip(qs, ans):
-            s = score_question(q, a)
+
+        for q, user_ans in zip(qs, ans):
+            s = score_question(q, user_ans)
             total += s
-            lbl = QLabel(f"{q['question']} → {s}%")
-            self.list.addWidget(lbl)
+
+            card = QFrame()
+            card.setObjectName("Card")
+            layout = QVBoxLayout(card)
+
+            layout.addWidget(QLabel(f"<b>Întrebare:</b><br>{q['question']}"))
+            layout.addWidget(QLabel(
+                f"<b>Răspunsul tău:</b><br>"
+                f"<span style='color:#FFD166'>{user_ans or '(gol)'}</span>"
+            ))
+            layout.addWidget(QLabel(
+                f"<b>Răspuns corect:</b><br>"
+                f"<span style='color:#06D6A0'>{q['answer']}</span>"
+            ))
+            layout.addWidget(QLabel(f"<b>Scor:</b> {s}%"))
+
+            self.list.addWidget(card)
+
         self.score.setText(f"Final Score: {total // len(qs)}%")
 
 
-# -------------------------
-# Main
-# -------------------------
+# -------------------------------------------------
+# MAIN WINDOW
+# -------------------------------------------------
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -236,12 +310,37 @@ class MainWindow(QMainWindow):
 
     def show_ans(self):
         q = self.exam.get_current_question()
-        QMessageBox.information(self, "Answer", q["answer"])
+
+        msg = QMessageBox(self)
+        msg.setWindowTitle("Answer")
+        msg.setText(q["answer"])
+
+        msg.setStyleSheet("""
+            QMessageBox {
+                background-color: #FFFFFF;
+            }
+            QLabel {
+                color: #000000;
+                font-size: 14px;
+            }
+            QPushButton {
+                background-color: #4F7DF3;
+                color: #FFFFFF;
+                padding: 6px 12px;
+                border-radius: 6px;
+            }
+        """)
+
+        msg.exec()
+
 
     def restart(self):
         self.stack.setCurrentWidget(self.start)
 
 
+# -------------------------------------------------
+# ENTRY POINT
+# -------------------------------------------------
 def main():
     app = QApplication(sys.argv)
     app.setStyleSheet(APP_STYLESHEET)
